@@ -2,7 +2,7 @@
 ###	#	
 ### # Project: 			#		RadioPlayer.co.uk - by The Highway 2013.
 ### # Author: 			#		The Highway
-### # Version:			#		v0.3.0
+### # Version:			#		v0.3.1
 ### # Description: 	#		http://RadioPlayer.co.uk
 ###	#	
 ### ############################################################################################################
@@ -674,18 +674,15 @@ def listItems(section=_default_section_, url='', startPage='1', numOfPages='1', 
 		ItemCount=len(iitems)
 		#iitems=sorted(iitems, key=lambda item: (item[2],item[1],item[0]),reverse=False)
 		deb('Number of Items',str(ItemCount))
+		from notablenames import *
 		for IDno,LName,SName,img,url in iitems:
-			if (LName[0:4]=='BBC '): LName='* '+LName
-			if (LName[0:7]=='Viking '): LName='* '+LName
+			LName=StarCheck(LName)
 			print (IDno,LName,SName,img,url)
 			contextMenuItems=[]; labs={}; 
 			labs['title']=cFL_(LName,ps('cFL_color'))
 			parsPS={'mode': 'PlaySong' , 'section': section, 'url': url, 'img': img, 'title': LName }
 			_addon.add_directory(parsPS, labs, img=img, fanart=_artFanart, contextmenu_items=contextMenuItems, total_items=ItemCount)
 	set_view('music',addst('default-view')); eod()
-
-
-
 
 
 def Menu_LoadCategories(section=_default_section_): #Categories
