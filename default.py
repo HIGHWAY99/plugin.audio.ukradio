@@ -2,7 +2,7 @@
 ###	#	
 ### # Project: 			#		RadioPlayer.co.uk - by The Highway 2013.
 ### # Author: 			#		The Highway
-### # Version:			#		v0.2.8
+### # Version:			#		v0.2.9
 ### # Description: 	#		http://RadioPlayer.co.uk
 ###	#	
 ### ############################################################################################################
@@ -117,6 +117,33 @@ _param['subfav']=addpr('subfav',''); _param['episodetitle']=addpr('episodetitle'
 ### ############################################################################################################
 ### ############################################################################################################
 ##### Player Functions #####
+def findURLs(html):
+	brackets=['"(http.+?)"',"'(http.+?)'",'"(rtmp.+?)"',"'(rtmp.+?)'",'\((http.+?)\)']
+	exbrackets=['.png','.jpg','.bmp','.js','.css','favourite','favorite','module','script','.dtd','w3.org/','/documents/','.txt','.ico','.zip','.rar','.ace','.psd','/help/','adobe.com','artists','cookie./polling.','/static.','/email','/programmes/','/programs/','']
+	finds=[]
+	for bracket in brackets:
+		try:		iitems=re.compile(bracket).findall(html)
+		except:	iitems=None
+		if (iitems is not None) and (iitems is not ''):
+			for iitem in iitems:
+				foundyn=False
+				for exb in exbrackets:
+					if (exb in iitem): foundyn=True
+				if (foundyn==False):
+					finds.append(iitem)
+	print finds
+	play=xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+	return
+	for find_ in finds:
+		try: 
+			if (play.isPlaying()): 
+				t=''
+				return
+			else: play.play(find_)
+			#return
+		except: t=''
+		#xbmc.sleep(200)
+
 def PlaySong(url, title, img):
 	WhereAmI('@ GetSong -- url: %s' % url); html=''
 	try: html=net.http_GET(url).content
@@ -159,7 +186,12 @@ def PlaySong(url, title, img):
 		except:	iitems=None
 	if (iitems is not None) and (iitems is not ''):
 		pug=iitems; deb('Song URL',iitems)
-	else: return
+	else: 
+		print 'Page URL:  '+url
+		print 'Title:  '+title
+		myNote(title,'Link not found.')
+		findURLs(html)
+		return
 	###
 	try: _addon.resolve_url(pug)
 	except: t=''
@@ -631,6 +663,9 @@ def listItems(section=_default_section_, url='', startPage='1', numOfPages='1', 
 		#iitems=sorted(iitems, key=lambda item: (item[2],item[1],item[0]),reverse=False)
 		deb('Number of Items',str(ItemCount))
 		for IDno,LName,SName,img,url in iitems:
+			if (LName[0:4]=='BBC '): LName='* '+LName
+			if (LName[0:7]=='Viking '): LName='* '+LName
+			print (IDno,LName,SName,img,url)
 			contextMenuItems=[]; labs={}; 
 			labs['title']=cFL_(LName,ps('cFL_color'))
 			parsPS={'mode': 'PlaySong' , 'section': section, 'url': url, 'img': img, 'title': LName }

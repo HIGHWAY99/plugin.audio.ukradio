@@ -1,3 +1,8 @@
+[B]Version 0.2.9[/B]
+- '* ' added before those stations that I know so far to be troublesome and/or not play.
+- those that a playable url cant be found for should pop up a message now and then search for available likely url's and print them to the xbmc.log file.
+- title and page-url are printed to the xbmc.log file when a playable url is not found.
+
 [B]Version 0.2.8[/B]
 - Found my artistic side and made a graphic for icon.png.
 - currently checks for 6 possible string formats for a playable url.  Avoid playing Viking for now as it uses rtmp and wanted to stall out for me.
