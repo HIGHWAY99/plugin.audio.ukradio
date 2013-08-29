@@ -1,3 +1,6 @@
+[B]Version 0.3.0[/B]
+- rtmp link disabling option
+
 [B]Version 0.2.9[/B]
 - '* ' added before those stations that I know so far to be troublesome and/or not play.
 - those that a playable url cant be found for should pop up a message now and then search for available likely url's and print them to the xbmc.log file.

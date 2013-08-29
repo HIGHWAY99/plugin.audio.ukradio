@@ -4,6 +4,7 @@
 		<setting id="enableMeta" 		type="bool" label="30203" default="false" visible="false"/>
 		<setting id="debug-enable" 	type="bool" label="30101" default="false" visible="true"/>
 		<setting id="debug-show" 		type="bool" label="30102" default="false" visible="true"/>
+		<setting id="rtmp-enable" 	type="bool" label="Enable RTMP Links" default="false" visible="true"/>
 		<setting visible="false" id="label-empty-favorites" 		type="bool" label="Show Labels in List: Empty Favorites" default="false"/>
 	</category>
 	<category label="Movies">

@@ -2,7 +2,7 @@
 ###	#	
 ### # Project: 			#		RadioPlayer.co.uk - by The Highway 2013.
 ### # Author: 			#		The Highway
-### # Version:			#		v0.2.9
+### # Version:			#		v0.3.0
 ### # Description: 	#		http://RadioPlayer.co.uk
 ###	#	
 ### ############################################################################################################
@@ -144,6 +144,13 @@ def findURLs(html):
 		except: t=''
 		#xbmc.sleep(200)
 
+def PlayURL(url):
+	play=xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+	try: _addon.resolve_url(url)
+	except: t=''
+	try: play.play(url)
+	except: t=''
+
 def PlaySong(url, title, img):
 	WhereAmI('@ GetSong -- url: %s' % url); html=''
 	try: html=net.http_GET(url).content
@@ -191,6 +198,11 @@ def PlaySong(url, title, img):
 		print 'Title:  '+title
 		myNote(title,'Link not found.')
 		findURLs(html)
+		return
+	if ('rtmp://' in pug) and (tfalse(addst('rtmp-enable'))==False):
+		print 'Page URL:  '+url
+		print 'Title:  '+title
+		myNote(title,'rtmp links are disabled.')
 		return
 	###
 	try: _addon.resolve_url(pug)
@@ -689,6 +701,8 @@ def Menu_MainMenu(): #The Main Menu
 	WhereAmI('@ the Main Menu')
 	_addon.add_directory({'mode': 'GetTitles', 'section': 'music', 'url': 'http://static.radioplayer.co.uk/v1/json/UkrpWebSiteStationList.jgz'}, {'title': cFL_('Radio Stations',ps('cFL_color'))}, fanart=_artFanart, img=ps('_button_url'))
 	_addon.add_directory({'mode': 'Settings'}, 				 {'title':  cFL_('Plugin Settings',ps('cFL_color2'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
+	#_addon.add_directory({'mode': 'PlayURL','url':'rtmp://wowza06.sharp-stream.com/magic1054aac'}, 				 {'title':  cFL_('Testing URL',ps('cFL_color3'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
+	#
 	##_addon.add_directory({'mode': 'DownloadStop'}, 		 {'title':  cFL('S',ps('cFL_color'))+'top Current Download'},is_folder=False		,img=_artDead							,fanart=_artFanart)
 	#_addon.add_directory({'mode': 'TextBoxFile',  'title': "[COLOR cornflowerblue]Local Change Log:[/COLOR]  %s"  % (__plugin__), 'url': ps('changelog.local')}, 	{'title': cFL('L',ps('cFL_color'))+'ocal Change Log'},					img=art('thechangelog','.jpg'), is_folder=False ,fanart=_artFanart)
 	#_addon.add_directory({'mode': 'TextBoxUrl',   'title': "[COLOR cornflowerblue]Latest Change Log:[/COLOR]  %s" % (__plugin__), 'url': ps('changelog.url')}, 		{'title': cFL('L',ps('cFL_color'))+'atest Online Change Log'},	img=art('thechangelog','.jpg'), is_folder=False ,fanart=_artFanart)
@@ -931,6 +945,7 @@ def check_mode(mode=''):
 	if (mode=='') or (mode=='main') or (mode=='MainMenu'): Menu_MainMenu()
 	#elif (mode=='PlayVideo'): 						PlayVideo(_param['url'], _param['infoLabels'], _param['listitem'])
 	elif (mode=='PlaySong'): 							PlaySong(_param['url'], _param['title'], _param['img'])
+	elif (mode=='PlayURL'): 							PlayURL(_param['url'])
 	#elif (mode=='PlayTrailer'): 					PlayTrailer(_param['url'], _param['title'], _param['year'], _param['img'])
 	elif (mode=='Settings'): 							_addon.addon.openSettings() #_plugin.openSettings()
 	#elif (mode=='ResolverSettings'): 			urlresolver.display_settings()
