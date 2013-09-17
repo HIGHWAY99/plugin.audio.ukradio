@@ -24,6 +24,12 @@ def StarCheck(n,c=False,t=True):
 	if (n=='') or (n==None): return n
 	n=StarCheck_parse(n,c,t)
 	n=StarCheck_rtmp(n,c,t)
+	n=StarCheck_outsideuk(n,c,t)
+	return n
+
+def StarCheck_outsideuk(n,c=False,t=True):		### unhandled links that havent had parsing setup for them.
+	c=SC_('Capital Manchstr',n,c)
+	if (c==t): n=sc+'^'+sp+n
 	return n
 
 def StarCheck_parse(n,c=False,t=True):		### unhandled links that havent had parsing setup for them.

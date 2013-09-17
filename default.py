@@ -2,7 +2,7 @@
 ###	#	
 ### # Project: 			#		RadioPlayer.co.uk - by The Highway 2013.
 ### # Author: 			#		The Highway
-### # Version:			#		v0.3.1
+### # Version:			#		v0.3.2
 ### # Description: 	#		http://RadioPlayer.co.uk
 ###	#	
 ### ############################################################################################################
@@ -145,7 +145,7 @@ def findURLs(html):
 		#xbmc.sleep(200)
 
 def PlayURL(url):
-	play=xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+	play=xbmc.Player(xbmc.PLAYER_CORE_AUTO) ### xbmc.PLAYER_CORE_AUTO | xbmc.PLAYER_CORE_DVDPLAYER | xbmc.PLAYER_CORE_MPLAYER | xbmc.PLAYER_CORE_PAPLAYER
 	try: _addon.resolve_url(url)
 	except: t=''
 	try: play.play(url)
@@ -199,19 +199,65 @@ def PlaySong(url, title, img):
 		myNote(title,'Link not found.')
 		findURLs(html)
 		return
+	if ('smil.' in pug) or ('.smil' in pug) or ('/smil/' in pug):
+		print 'Page URL:  '+url
+		print 'Title:  '+title
+		pug2=pug
+		try: html2=net.http_GET(pug).content
+		except: html2=''
+		try:		pug=re.compile('"(\D\D\D\D://.+?)"').findall(html)[0]
+		except:	
+			try:		pug=re.compile("'(\D\D\D\D://.+?)'").findall(html)[0]
+			except:	t=''
+		print 'URL in SMIL:  '+url
+		#myNote(title,'rtmp links are disabled.')
+		#return
 	if ('rtmp://' in pug) and (tfalse(addst('rtmp-enable'))==False):
 		print 'Page URL:  '+url
 		print 'Title:  '+title
 		myNote(title,'rtmp links are disabled.')
 		return
+	elif ('rtmp://' in pug) and (tfalse(addst('rtmp-enable'))==True):
+		#
+		pug2=pug+' playpath='+pug.replace('rtmp://','').split('/')[-1]
+		#pug2=get_stream_url(pug)
+		##pug2=get_stream_url(url)
+		play=xbmc.Player(xbmc.PLAYER_CORE_AUTO) ### xbmc.PLAYER_CORE_AUTO | xbmc.PLAYER_CORE_DVDPLAYER | xbmc.PLAYER_CORE_MPLAYER | xbmc.PLAYER_CORE_PAPLAYER
+		try: play.play(pug2)
+		except: t=''
+		#
+		return
 	###
 	try: _addon.resolve_url(pug)
 	except: t=''
-	play=xbmc.Player(xbmc.PLAYER_CORE_AUTO)
+	play=xbmc.Player(xbmc.PLAYER_CORE_AUTO) ### xbmc.PLAYER_CORE_AUTO | xbmc.PLAYER_CORE_DVDPLAYER | xbmc.PLAYER_CORE_MPLAYER | xbmc.PLAYER_CORE_PAPLAYER
 	try: play.play(pug)
 	except: t=''
 	###
 	return
+
+def get_stream_url(url):
+	if not url: return None
+	import simplejson
+	# Workout json config path
+	f = urllib2.urlopen(url)
+	html = f.read()
+	start = html.find('jsonConfigPath:')
+	end = html.find('\n', start)
+	configpath = html[start:end]
+	start = configpath.find('"')
+	end = configpath.find('"', start + 1)
+	configpath = configpath[start + 1:end]
+	# Read json config for station
+	f = urllib2.urlopen(url + configpath)
+	config = simplejson.load(f)
+	# Create rtmp stream url
+	if 'akamaiAudio_serverMount' in config:
+		rtmpurl = 'rtmp://%s/%s' % (config['akamaiAudio_serverMount'][0], config['AAC_Audio_stream'])
+		swfurl = config['player_siteBase']
+		return '%s swfurl=%s/ swfvfy=true pageurl=%s/ live=true' % (rtmpurl, swfurl, swfurl)
+	else:
+		return None
 
 def PlayVideo(url, infoLabels, listitem):
 	#WhereAmI('@ PlayVideo -- Getting ID From:  %s' % url); My_infoLabels=eval(infoLabels)
@@ -664,7 +710,8 @@ def listItems(section=_default_section_, url='', startPage='1', numOfPages='1', 
 			except: html=''
 	if (html=='') or (html=='none') or (html==None): deb('Error','Problem with page'); deadNote('Results:  '+section,'No results were found.'); return
 	deb('Length of HTML',str(len(html)))
-	#html=messupText(html,True,True,True,False)
+	#html=ParseDescription(html)
+	#html=messupText(html,True,True,False,False)
 	#print html
 	#html=ParseDescription(html); html=remove_accents(html) #if (_debugging==True): print html
 	s='"(\d+)":{"name":"(.+?)","sortName":"(.+?)","logoUrl":"(http://.+?)","playerUrl":"(http://.+?)"}'
@@ -677,11 +724,13 @@ def listItems(section=_default_section_, url='', startPage='1', numOfPages='1', 
 		from notablenames import *
 		for IDno,LName,SName,img,url in iitems:
 			LName=StarCheck(LName)
-			print (IDno,LName,SName,img,url)
+			#print (IDno,LName,SName,img,url)
 			contextMenuItems=[]; labs={}; 
-			labs['title']=cFL_(LName,ps('cFL_color'))
+			labs['title']=cFL_(ParseDescription(LName),ps('cFL_color'))
 			parsPS={'mode': 'PlaySong' , 'section': section, 'url': url, 'img': img, 'title': LName }
-			_addon.add_directory(parsPS, labs, img=img, fanart=_artFanart, contextmenu_items=contextMenuItems, total_items=ItemCount)
+			debob(parsPS)
+			try: _addon.add_directory(parsPS, labs, img=img, fanart=_artFanart, contextmenu_items=contextMenuItems, total_items=ItemCount)
+			except: t=''
 	set_view('music',addst('default-view')); eod()
 
 
@@ -696,9 +745,17 @@ def Menu_LoadCategories(section=_default_section_): #Categories
 
 def Menu_MainMenu(): #The Main Menu
 	WhereAmI('@ the Main Menu')
+	test_url='rtmp://wowza06.sharp-stream.com/magic1054aac'
+	test_urlA='rtmp://wowza06.sharp-stream.com'
+	test_urlB='/magic1054aac'
+	test_url2='rtmp://wind.passiondigital.com/shoutcast/'
 	_addon.add_directory({'mode': 'GetTitles', 'section': 'music', 'url': 'http://static.radioplayer.co.uk/v1/json/UkrpWebSiteStationList.jgz'}, {'title': cFL_('Radio Stations',ps('cFL_color'))}, fanart=_artFanart, img=ps('_button_url'))
 	_addon.add_directory({'mode': 'Settings'}, 				 {'title':  cFL_('Plugin Settings',ps('cFL_color2'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
-	#_addon.add_directory({'mode': 'PlayURL','url':'rtmp://wowza06.sharp-stream.com/magic1054aac'}, 				 {'title':  cFL_('Testing URL',ps('cFL_color3'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
+	#_addon.add_directory({'mode': 'PlayURL','url':test_url2}, 				 {'title':  cFL_('Testing URL2',ps('cFL_color3'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
+	#_addon.add_directory({'mode': 'PlayURL','url':test_url}, 				 {'title':  cFL_('Testing URL',ps('cFL_color3'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
+	#_addon.add_directory({'mode': 'PlayURL','url':test_urlA+':3690'+test_urlB}, 				 {'title':  cFL_('Testing URL:3690',ps('cFL_color3'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
+	#_addon.add_directory({'mode': 'PlayURL','url':test_urlA+':443'+test_urlB}, 				 {'title':  cFL_('Testing URL:443',ps('cFL_color3'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
+	#_addon.add_directory({'mode': 'PlayURL','url':test_urlA+':80'+test_urlB}, 				 {'title':  cFL_('Testing URL:80',ps('cFL_color3'))}			,is_folder=False		,fanart=_artFanart, img=ps('_button_url'))
 	#
 	##_addon.add_directory({'mode': 'DownloadStop'}, 		 {'title':  cFL('S',ps('cFL_color'))+'top Current Download'},is_folder=False		,img=_artDead							,fanart=_artFanart)
 	#_addon.add_directory({'mode': 'TextBoxFile',  'title': "[COLOR cornflowerblue]Local Change Log:[/COLOR]  %s"  % (__plugin__), 'url': ps('changelog.local')}, 	{'title': cFL('L',ps('cFL_color'))+'ocal Change Log'},					img=art('thechangelog','.jpg'), is_folder=False ,fanart=_artFanart)

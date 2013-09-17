@@ -863,8 +863,10 @@ def clean_filename(filename):
     return re.sub('[/:"*?<>|]+', ' ', filename)
 
 def ParseDescription(plot): ## Cleans up the dumb number stuff thats ugly.
+	if ("&amp;"  in plot):  plot=plot.replace('&amp;'  ,'&')#&amp;#x27;
+	if ("&nbsp;" in plot):  plot=plot.replace('&nbsp;' ," ")
+	#if (chr(226) in plot): plot=plot.replace(chr(226),"'")
 	if ('&#' in plot) and (';' in plot):
-		if ("&amp;"  in plot):  plot=plot.replace('&amp;'  ,'&')#&amp;#x27;
 		if ("&#8211;" in plot): plot=plot.replace("&#8211;",";") #unknown
 		if ("&#8216;" in plot): plot=plot.replace("&#8216;","'")
 		if ("&#8217;" in plot): plot=plot.replace("&#8217;","'")
@@ -879,6 +881,7 @@ def ParseDescription(plot): ## Cleans up the dumb number stuff thats ugly.
 		if ("&#0421;" in plot): plot=plot.replace('&#0421;',"")
 		if ("&#xE9;" in plot):  plot=plot.replace('&#xE9;' ,"e")
 		if ("&#xE2;" in plot):  plot=plot.replace('&#xE2;' ,"a")
+		#if ("&#2019;" in plot): plot=plot.replace('&#2019;',"")
 		if ('&#' in plot) and (';' in plot):
 			try:		matches=re.compile('&#(.+?);').findall(plot)
 			except:	matches=''
@@ -887,6 +890,9 @@ def ParseDescription(plot): ## Cleans up the dumb number stuff thats ugly.
 					if (match is not '') and (match is not ' ') and ("&#"+match+";" in plot):  plot=plot.replace("&#"+match+";" ,"")
 		#if ("\xb7"  in plot):  plot=plot.replace('\xb7'   ,"-")
 		#if ('&#' in plot) and (';' in plot): plot=unescape_(plot)
+	for i in xrange(127,256):
+		try: plot=plot.replace(chr(i),"")
+		except: plot=plot
 	return plot
 def unescape_(s):
 	p = htmllib.HTMLParser(None)
