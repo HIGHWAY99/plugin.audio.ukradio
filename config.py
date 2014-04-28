@@ -189,6 +189,8 @@ def ps(x):
 		,'AdvSearch.tags.6': 		'year_to'
 		,'AdvSearch.tags.7': 		'genre'
 		,'AdvSearch.tags.8': 		''
+		,'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; en-US; rv:24.0) Gecko/20100101 Firefox/24.0'
+		,'proxy': 							""
 ##		,'LLinks.compile.': 							
 #		,'': 		''
 #		,'': 

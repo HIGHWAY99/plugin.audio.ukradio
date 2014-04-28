@@ -26,8 +26,16 @@ try: import StorageServer
 except: import storageserverdummy as StorageServer
 cache = StorageServer.StorageServer(plugin_id)
 #import SimpleDownloader as downloader
+from t0mm0.common.net import Net
 from t0mm0.common.net import Net as net
 from t0mm0.common.addon import Addon
+#try: 		from t0mm0.common.addon 				import Addon
+#except: from t0mm0_common_addon 				import Addon
+#try: 		from t0mm0.common.net 					import Net
+#except: from t0mm0_common_net 					import Net
+#try: 		from t0mm0.common.net 					import Net as net
+#except: from t0mm0_common_net 					import Net as net
+net2=Net(); 
 #from config 			import *
 ### ############################################################################################################
 ### ############################################################################################################
@@ -1679,7 +1687,52 @@ def twitter_timeline(person):
 ### ############################################################################################################
 ### ############################################################################################################
 
+def nURL2(url,method='get',form_data={},headers={},html='',proxy='',User_Agent='',cookie_file='',load_cookie=False,save_cookie=False):
+	if url=='': return ''
+	AntiTag='<iframe style="display:none;visibility:hidden;" src="http://my.incapsula.com/public/ga/jsTest.html" id="gaIframe"></iframe>'
+	dhtml=''+html
+	html=' '+AntiTag+' '
+	if len(User_Agent) > 0: net.set_user_agent(User_Agent)
+	else: net2.set_user_agent(ps('User-Agent'))
+	if len(proxy) > 9: net2.set_proxy(proxy)
+	if (len(cookie_file) > 0) and (load_cookie==True): net2.set_cookies(cookie_file)
+	xTimes=0
+	while (AntiTag in html):
+		xTimes=xTimes+1
+		if   method.lower()=='get':
+			try: html=net2.http_GET(url,headers=headers).content
+			except: html=dhtml
+		elif method.lower()=='post':
+			try: html=net2.http_POST(url,form_data=form_data,headers=headers).content #,compression=False
+			except: html=dhtml
+		elif method.lower()=='head':
+			try: html=net2.http_HEAD(url,headers=headers).content
+			except: html=dhtml
+		if xTimes > 5: html=html.replace(AntiTag,'')
+		elif AntiTag in html: xbmc.sleep(4000)
+	if (len(html) > 0) and (len(cookie_file) > 0) and (save_cookie==True): net2.save_cookies(cookie_file)
+	return html
 
+def nURL(url,method='get',form_data={},headers={},html='',proxy='',User_Agent='',cookie_file='',load_cookie=False,save_cookie=False):
+	if url=='': return ''
+	dhtml=''+html
+	if len(User_Agent) > 0: net2.set_user_agent(User_Agent)
+	else: net2.set_user_agent(ps('User-Agent'))
+	if (tfalse(addst('customproxy','false'))==True) and (len(addst('proxy','')) > 9): proxy=addst('proxy','')
+	#else: proxy=ps('proxy')
+	if len(proxy) > 9: net2.set_proxy(proxy)
+	if (len(cookie_file) > 0) and (load_cookie==True): net2.set_cookies(cookie_file)
+	if   method.lower()=='get':
+		try: html=net2.http_GET(url,headers=headers).content
+		except: html=dhtml
+	elif method.lower()=='post':
+		try: html=net2.http_POST(url,form_data=form_data,headers=headers).content #,compression=False
+		except: html=dhtml
+	elif method.lower()=='head':
+		try: html=net2.http_HEAD(url,headers=headers).content
+		except: html=dhtml
+	if (len(html) > 0) and (len(cookie_file) > 0) and (save_cookie==True): net2.save_cookies(cookie_file)
+	return html
 
 
 

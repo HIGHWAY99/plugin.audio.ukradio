@@ -2,7 +2,7 @@
 ###	#	
 ### # Project: 			#		RadioPlayer.co.uk - by The Highway 2013.
 ### # Author: 			#		The Highway
-### # Version:			#		v0.3.2
+### # Version:			#		v0.3.3
 ### # Description: 	#		http://RadioPlayer.co.uk
 ###	#	
 ### ############################################################################################################
@@ -153,13 +153,15 @@ def PlayURL(url):
 
 def PlaySong(url, title, img):
 	WhereAmI('@ GetSong -- url: %s' % url); html=''
-	try: html=net.http_GET(url).content
-	except: 
-		try: html=getURL(url)
-		except: 
-			try: html=getURLr(url,_domain_url)
-			except: html=''
-	#print html_
+	try: html=nURL(url)
+	except: html=''
+	#try: html=net.http_GET(url).content
+	#except: 
+	#	try: html=getURL(url)
+	#	except: 
+	#		try: html=getURLr(url,_domain_url)
+	#		except: html=''
+	##print html_
 	if (html=='') or (html=='none') or (html==None): deb('Error','Problem with page'); deadNote('Results:  '+section,'No results were found.'); return
 	deb('Length of HTML',str(len(html)))
 	#html=ParseDescription(html); html=remove_accents(html) #if (_debugging==True): print html
@@ -191,6 +193,23 @@ def PlaySong(url, title, img):
 	else: 
 		try:		iitems=re.compile('flashvars\.url\s*=\s*"(.+?)"').findall(html)[0]
 		except:	iitems=None
+	if (iitems is not None) and (iitems is not ''): pug=iitems; deb('Song URL',iitems)
+	else: 
+		try:		
+			iitems=re.compile("var.*?\s+audioUrl\s*:\s*'(.+?://.+?\.mp3)'").findall(nolines(html))[0]
+			if "'" in iitems: iitems=iitems.split("'")[-1]; 
+		except:	iitems=None
+	if (iitems is not None) and (iitems is not ''): pug=iitems; deb('Song URL',iitems)
+	else: 
+		try:		
+			iitems=re.compile("var.*?\s+audioUrl\s*:\s*'(.+?://.+?)'").findall(nolines(html))[0]
+			if "'" in iitems: iitems=iitems.split("'")[-1]; 
+		except:	iitems=None
+	if (iitems is not None) and (iitems is not ''):
+		pug=iitems; deb('Song URL',iitems)
+	else: 
+		try:		iitems=re.compile('\s*file\s*:\s*"(.+?)"').findall(nolines(html))[0]
+		except:	iitems=None
 	if (iitems is not None) and (iitems is not ''):
 		pug=iitems; deb('Song URL',iitems)
 	else: 
@@ -198,16 +217,20 @@ def PlaySong(url, title, img):
 		print 'Title:  '+title
 		myNote(title,'Link not found.')
 		findURLs(html)
+		try: debob(html); 
+		except: pass
 		return
 	if ('smil.' in pug) or ('.smil' in pug) or ('/smil/' in pug):
 		print 'Page URL:  '+url
 		print 'Title:  '+title
 		pug2=pug
-		try: html2=net.http_GET(pug).content
+		try: html2=nURL(pug)
 		except: html2=''
-		try:		pug=re.compile('"(\D\D\D\D://.+?)"').findall(html)[0]
+		#try: html2=net.http_GET(pug).content
+		#except: html2=''
+		try:		pug=re.compile('"(\D\D\D\D://.+?)"').findall(html2)[0]
 		except:	
-			try:		pug=re.compile("'(\D\D\D\D://.+?)'").findall(html)[0]
+			try:		pug=re.compile("'(\D\D\D\D://.+?)'").findall(html2)[0]
 			except:	t=''
 		print 'URL in SMIL:  '+url
 		#myNote(title,'rtmp links are disabled.')
@@ -228,6 +251,7 @@ def PlaySong(url, title, img):
 		#
 		return
 	###
+	debob(pug); 
 	try: _addon.resolve_url(pug)
 	except: t=''
 	play=xbmc.Player(xbmc.PLAYER_CORE_AUTO) ### xbmc.PLAYER_CORE_AUTO | xbmc.PLAYER_CORE_DVDPLAYER | xbmc.PLAYER_CORE_MPLAYER | xbmc.PLAYER_CORE_PAPLAYER
@@ -262,12 +286,14 @@ def get_stream_url(url):
 def PlayVideo(url, infoLabels, listitem):
 	#WhereAmI('@ PlayVideo -- Getting ID From:  %s' % url); My_infoLabels=eval(infoLabels)
 	WhereAmI('@ GetVideo -- url: %s' % url); html=''
-	try: html=net.http_GET(url).content
-	except: 
-		try: html=getURL(url)
-		except: 
-			try: html=getURLr(url,_domain_url)
-			except: html=''
+	try: html=nURL(url)
+	except: html=''
+	#try: html=net.http_GET(url).content
+	#except: 
+	#	try: html=getURL(url)
+	#	except: 
+	#		try: html=getURLr(url,_domain_url)
+	#		except: html=''
 	#print html_
 	if (html=='') or (html=='none') or (html==None): deb('Error','Problem with page'); deadNote('Results:  '+section,'No results were found.'); return
 	deb('Length of HTML',str(len(html)))
@@ -303,7 +329,10 @@ def PlayLibrary(section, url, showtitle='', showyear=''): ### Menu for Listing H
 	#eod()
 	#_addon.resolve_url(url)
 	if (url==''): return
-	html=net.http_GET(url).content; html=html.encode("ascii", "ignore")
+	try: html=nURL(url)
+	except: html=''
+	#html=net.http_GET(url).content; 
+	html=html.encode("ascii", "ignore")
 	##if (_debugging==True): print html
 	#if  ( section == 'tv'): ## TV Show ## Title (Year) - Info
 	#	match=re.compile(ps('LLinks.compile.show_episode.info'), re.MULTILINE | re.IGNORECASE | re.DOTALL).findall(html)[0] ### <title>Watch The Walking Dead Online for Free - Prey - S03E14 - 3x14 - SolarMovie</title>
@@ -347,7 +376,9 @@ def PlayLibrary(section, url, showtitle='', showyear=''): ### Menu for Listing H
 		hItem=hList[rt]
 		deb('ID',hItem[4])
 		urlB='%s/link/play/%s/' % (ps('_domain_url'),hItem[4])
-		html=net.http_GET(urlB).content
+		try: html=nURL(urlB)
+		except: html=''
+		#html=net.http_GET(urlB).content
 		try: url=re.compile('<iframe.+?src="(.+?)"', re.MULTILINE | re.DOTALL | re.IGNORECASE).findall(html)[0]
 		except: url=''
 		url=url.replace('/embed/', '/file/'); deb('hoster url',url)
@@ -702,12 +733,16 @@ def mdGetSplitFindGroup(html,ifTag='', parseTag='',startTag='',endTag=''):
 def listItems(section=_default_section_, url='', startPage='1', numOfPages='1', genre='', year='', stitle='', season='', episode='', html='', chck=''): # List: Movies or TV Shows
 	if (url==''): deadNote('URL Error', 'No URL was Found.'); return
 	html=''; WhereAmI('@ the Item List -- url: %s' % url)
-	try: html=net.http_GET(url).content
-	except: 
-		try: html=getURL(url)
-		except: 
-			try: html=getURLr(url,_domain_url)
-			except: html=''
+	try: html=nURL(url)
+	except:
+		try: html=nURL(url,headers={'Referer':_domain_url})
+		except: html=''
+	#try: html=net.http_GET(url).content
+	#except: 
+	#	try: html=getURL(url)
+	#	except: 
+	#		try: html=getURLr(url,_domain_url)
+	#		except: html=''
 	if (html=='') or (html=='none') or (html==None): deb('Error','Problem with page'); deadNote('Results:  '+section,'No results were found.'); return
 	deb('Length of HTML',str(len(html)))
 	#html=ParseDescription(html)
@@ -729,6 +764,7 @@ def listItems(section=_default_section_, url='', startPage='1', numOfPages='1', 
 			labs['title']=cFL_(ParseDescription(LName),ps('cFL_color'))
 			parsPS={'mode': 'PlaySong' , 'section': section, 'url': url, 'img': img, 'title': LName }
 			debob(parsPS)
+			if tfalse(addst("show-url-enable"))==True: labs['title']+='[CR][COLOR blue]'+url+'[/COLOR]'
 			try: _addon.add_directory(parsPS, labs, img=img, fanart=_artFanart, contextmenu_items=contextMenuItems, total_items=ItemCount)
 			except: t=''
 	set_view('music',addst('default-view')); eod()

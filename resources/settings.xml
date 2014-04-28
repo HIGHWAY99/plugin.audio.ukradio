@@ -1,10 +1,13 @@
 <settings>
 	<category label="General">
 		<setting visible="false" id="pages"    type="labelenum" label="Number of Pages" values="1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|25|30|35|40|45|50|55|60|70|80|90|99|100"             default="1"/>
-		<setting id="enableMeta" 		type="bool" label="30203" default="false" visible="false"/>
-		<setting id="debug-enable" 	type="bool" label="30101" default="false" visible="true"/>
-		<setting id="debug-show" 		type="bool" label="30102" default="false" visible="true"/>
+		<setting id="enableMeta" 		type="bool" label="Enable Metadata" default="false" visible="false"/>
 		<setting id="rtmp-enable" 	type="bool" label="Enable RTMP Links" default="false" visible="true"/>
+		<setting id="show-url-enable" 	type="bool" label="Show URLs" default="true" visible="true"/>
+    <setting label="Use Custom Proxy" type="bool" 	id="customproxy" 		default="false"/>
+    <setting label="Proxy (freeproxylists.net)" type="text" id="proxy" 	default="http://50.2.64.206:8089" enable="!eq(-1,false)"/>
+		<setting id="debug-enable" 	type="bool" label="Enable Debugging to File" default="false" visible="true"/>
+		<setting id="debug-show" 		type="bool" label="Enable Debugging to Notice(s)" default="false" visible="true"/>
 		<setting visible="false" id="label-empty-favorites" 		type="bool" label="Show Labels in List: Empty Favorites" default="false"/>
 	</category>
 	<category label="Movies">
